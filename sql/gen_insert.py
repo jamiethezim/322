@@ -1,8 +1,7 @@
-import psycopg2
 
-#cur.execute(""sql command)
 def products():
     product_file = open('osnap_legacy/product_list.csv', 'r');
+    i = 0
     for line in product_file:
         info = line.split(',');
         name = info[0]
@@ -11,12 +10,11 @@ def products():
         unit_price = info[3]
         vendor = info[4]
         compartments = info[5]
-        print("INSERT INTO products (vendor, description) VALUES ('{}', '{}');".format(vendor, description))
+        i = i + 1
+        print("INSERT INTO products (product_pk, vendor, description) VALUES ('{}', '{}', '{}');".format(i, vendor, description))
 
         
 def main():
-    #conn = psycopg2.connect("dbname=homework2 user=postgres")
-    #cur = con.cursor()
     products()
 
 if __name__ == '__main__':
