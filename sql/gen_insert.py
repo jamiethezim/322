@@ -13,13 +13,16 @@ def products():
         i = i + 1
         print("INSERT INTO products (product_pk, vendor, description) VALUES ('{}', '{}', '{}');".format(i, vendor, description))
 
-        
+#TODO:
+# write remaining functions that parse different csv files.
+
 def main():
     products()
 
 if __name__ == '__main__':
     main()
 ##print("INSERT INTO assets (description, asset_tag) VALUES ('item1', 'AT001');')
+## -> These are personal notes I took during lecture to help me remember the process of python scripting
 # python3 gen_insert.py > insert.sql
 # psql lost -f insert.sql # runs the sql script on the database
 # does some calculating and parsing of legacy data and prints to stdout the sql statement
