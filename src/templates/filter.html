@@ -1,0 +1,24 @@
+<html>
+	<head></head>
+	<body>
+	<h2> Filter items on report </h2>
+	<p>{{session.username}}! </p>
+
+	<form action="{{url_for('facility')}}" method="POST">
+		<input type='text' name='fcode'>
+		<input type="submit" value="facility report">
+	</form>
+
+	<form action="{{url_for('transit')}}" method="POST">
+		<input type='text' name='searchtime'>
+		<input type="submit" value="In transit report">
+	</form>
+	
+	<form action="{{url_for('logout')}}" method="POST">
+		<input type="submit" value="logout">
+	</form>
+
+
+	</body>
+	
+</html>

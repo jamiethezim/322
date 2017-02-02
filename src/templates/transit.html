@@ -1,0 +1,18 @@
+<html>
+	<head></head>
+	<body>
+		<h2> In transit  </h2>
+
+		<table>
+			{%for entry in session.item_list%}
+			<tr>
+				<td>{{entry.asset}} </td>
+				<td>{{entry.load_time}}</td>
+				<td>{{entry.unload_time}}</td>
+			</tr>
+			{% endfor%}
+		</table>
+	
+	
+	</body>
+</html>
