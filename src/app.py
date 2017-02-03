@@ -3,6 +3,8 @@ from config import dbname, dbhost, dbport
 #from osnap_crypto import encrypt, decrypt_and_verify
 import json
 import datetime
+import string
+import random
 import sys
 import psycopg2
 
@@ -25,6 +27,20 @@ def filter():
         username = request.form['username']
         session['username'] = username
     return render_template('filter.html')
+
+
+@app.route('/rest')
+def rest():
+	return render_template('rest.html')
+
+@app.route('/rest/lost_key', methods=('POST',))
+def lost_key():
+	respond = dict()
+	respond['result'] = 'OK'
+	key = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
+	respond['key'] = key
+	return json.dumps(respond)
+
 
 @app.route('/rest/list_products', methods=('POST',))
 def list_products():
@@ -108,38 +124,39 @@ def add_asset():
 	return json.dumps(respond)
 
 
-
+@app.route('/rest/activate_user', methods=('POST',))
+def activate_user():
+	if request.method=='POST':
+		req = json.loads(request.form['arguments'])
+	timestamp = req['timestamp']
+	username = req['username']
+	
+	#TODO db manipulation
+	# if user in database, add permission to user role - OK
+	# if not in db, insert new entry - NEW
+	#respond with result
+	respond = dict()
+	respond['timestamp'] = timestamp
+	respond['result'] = 'OK'
+	return json.dumps(respond)
 
 @app.route('/rest/suspend_user', methods=('POST',))
 def suspend_user():
-    # Check if the call uses crypto
-    if request.method=='POST' and 'signature' in request.form and \
-            request.form['signature'] != '' and 'arguments' in request.form:
-        # do the crypto, expect that hr is on the other side
-        (data, skey, nonce) = decrypt_and_verify(request.form['arguments'], request.form['signature'], lost_priv, user_pub)
+	if request.method=='POST':
+		req=json.loads(request.form['arguments'])
         
-        # Process the request
-        req=json.loads(data)
-        
+	timestamp = req['timestamp']
+	username = req['username']
+	
+	#TODO db manipulation
+	# find user name, change user role to restricted, etc
+	
         # Prepare the response data
-        dat = dict()
-        dat['timestamp'] = req['timestamp']
-        dat['result'] = 'OK'
-        data = json.dumps(dat)
-        
-        # Encrypt and send the response
-        data = encrypt(data,skey,nonce)
-        return data
+	dat = dict()
+	dat['timestamp'] = req['timestamp']
+	dat['result'] = 'OK'
+	return json.dumps(dat)
     
-    # Try to handle as plaintext
-    elif request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
 
 @app.route('/goodbye')
 def goodbye():
