@@ -73,8 +73,14 @@ def login():
 		pk2 = res2[0][0]
 		if usn == found_usn and pwd == found_pwd and pk1 == pk2:
 			print("found match: {} {} {}".format(found_usn, found_pwd, pk1))
+			session['username'] = usn
 			return redirect((url_for('dashboard')))
 		
+@app.route('/dashboard', methods=['GET'])
+def dashboard():
+	return render_template('dashboard.html')
+
+
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080)
