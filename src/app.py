@@ -25,13 +25,25 @@ def create_user():
 		SQL = "SELECT username, password FROM logins where username = '{}' AND password = '{}'".format(usn, pwd)
 		cur.execute(SQL)
 		res = cur.fetchall()
-		print(res)
-		#if user in db, render html saying 'user exists
-		#else, insert into db, render html saying 'user added
 
+		#if user not in db, add credentials, render html saying user added
+		if res == []: #no match
+			print('no user')
+			SQL = "INSERT INTO logins (username, password) VALUES (%s, %s)"
+			data = (usn, pwd)
+			cur.execute(SQL, data)
+			conn.commit()
+			print('sql insert successful')
+			return
 
-		#just to know if I did POST right
-		return render_template('yay.html')
+		#this elif condition is a little goofy... res is a list of tuples,
+		#but as long as there are no duplicate usn/pwd combos in db
+		#the sql query should only ever find at most 1 result, so it's a list of one tuple
+		
+		#otherwise user in db and render html saying user exists
+		elif usn == res[0][0] and pwd == res[0][1]:
+			print('ya did it') #testing elif
+			return render_template('yay.html')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080)
