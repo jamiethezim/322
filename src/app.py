@@ -15,7 +15,7 @@ cur = conn.cursor()
 def create_user():
 	if request.method == 'GET':
 		#loops back to itself
-		return render_template('create_user.html')
+		return render_template('create_user.html') # this has to loop to an html page, otherwise infinite loop!
 	elif request.method == 'POST':
 		#get login credentials locally
 		usn = request.form['username']
