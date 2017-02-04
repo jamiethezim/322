@@ -20,6 +20,17 @@ def create_user():
 		#get login credentials locally
 		usn = request.form['username']
 		pwd = request.form['password']
+		
+		#check if user in db
+		SQL = "SELECT username, password FROM logins where username = '{}' AND password = '{}'".format(usn, pwd)
+		cur.execute(SQL)
+		res = cur.fetchall()
+		print(res)
+		#if user in db, render html saying 'user exists
+		#else, insert into db, render html saying 'user added
+
+
+		#just to know if I did POST right
 		return render_template('yay.html')
 
 if __name__ == '__main__':
