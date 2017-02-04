@@ -34,7 +34,7 @@ def create_user():
 			cur.execute(SQL, data)
 			conn.commit()
 			print('sql insert successful')
-			return
+			return render_template('user_added.html')
 
 		#this elif condition is a little goofy... res is a list of tuples,
 		#but as long as there are no duplicate usn/pwd combos in db
@@ -42,7 +42,6 @@ def create_user():
 		
 		#otherwise user in db and render html saying user exists
 		elif usn == res[0][0] and pwd == res[0][1]:
-			print('ya did it') #testing elif
 			return render_template('yay.html')
 
 if __name__ == '__main__':
