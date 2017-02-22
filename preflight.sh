@@ -14,5 +14,5 @@ fi
 # Andy's script already drops and creates db
 cd sql
 psql $1 -f create_tables.sql
-
-#cp -R /home/osnapdev/322/src $HOME/wsgi
+cd ..
+cp -R src/* $HOME/wsgi
