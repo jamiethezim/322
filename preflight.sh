@@ -15,4 +15,4 @@ fi
 cd sql
 psql $1 -f create_tables.sql
 
-
+#cp -R /home/osnapdev/322/src $HOME/wsgi
