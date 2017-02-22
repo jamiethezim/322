@@ -130,6 +130,12 @@ def add_asset():
 	res = cur.fetchall()
 	keys = ('asset_tag', 'description')
 	session['asset_list'] = [dict(zip(keys, row)) for row in res]
+
+	SQL = "SELECT common_name from facilities"
+	cur.execute(SQL)
+	res = cur.fetchall()
+	session['fac_options'] = [row[0] for row in res]
+	print(session['fac_options'])
 	if request.method == 'GET':
 		return render_template('add_asset.html')
 	elif request.method == 'POST':
@@ -137,7 +143,6 @@ def add_asset():
 		loc = request.form['common_name']
 		descr = request.form['description']
 		time = request.form['date']
-		disp = False
 		print(tag, loc, descr, time)
 
 		#check if asset tag in db
@@ -145,8 +150,8 @@ def add_asset():
 		cur.execute(SQL)
 		res = cur.fetchall()
 		if not res: #if asset not in db, add it
-			SQL = "INSERT INTO assets (asset_tag, description, disposed) VALUES (%s, %s, %s) RETURNING asset_pk"
-			data = (tag, descr, disp)
+			SQL = "INSERT INTO assets (asset_tag, description) VALUES (%s, %s) RETURNING asset_pk"
+			data = (tag, descr)
 			cur.execute(SQL, data)
 			asset_pk = cur.fetchone()[0]
 			conn.commit()
@@ -178,17 +183,19 @@ def dispose_asset():
 		return render_template('dispose_asset.html')
 	if request.method == 'POST':
 		tag = request.form['asset_tag']
+		time = request.form['date'] #this is a string
 		#check if asset in db
 		SQL = "SELECT asset_tag, disposed from assets WHERE asset_tag LIKE '{}'".format(tag)
 		cur.execute(SQL)
-		res = cur.fetchall()
+		res = cur.fetchall() #tuple of strings and datetime object
 		if not res:
 			return render_template('no_asset.html')
-		elif res[0][0] == True: #if disposed ###TODO rewrite the boolean sql data types to be less dorky
+		elif not res[0][1] is None: #if disposed
 			return render_template('dispose.html')
 		else: #update disposed status
-			SQL = "UPDATE assets SET disposed = TRUE where asset_tag = '{}'".format(tag)
-			cur.execute(SQL)
+			SQL = "UPDATE assets SET disposed = %s where asset_tag = %s"
+			data = (time, tag)
+			cur.execute(SQL, data)
 			conn.commit()
 			return render_template('dashboard.html')
 
