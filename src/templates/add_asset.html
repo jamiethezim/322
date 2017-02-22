@@ -14,18 +14,16 @@
 		<form action="{{url_for('add_asset')}}" method="POST">
 			<p>asset location </p>
 			<select name='common_name'>
-				<option value='DC'> DC </option>
-				<option value='HQ'> HQ </option>
-				<option value='SPNV'> SPNV </option>
-				<option value='MB005'> MB005 </option>
-				<option value='NC'> NC </option>
+				{% for fac in session.fac_options%}
+				<option value='{{fac}}'> {{fac}} </option>
+				{%endfor%}
 			</select>
 			<p>asset tag: </p>
 			<input type='text' name='asset_tag'>
 			<p> asset description: </p>
 			<input type='text' name='description'>
-			<p> arrival date: In form MM/DD/YYYY ie "01/02/2017" </p>
-			<input type='text' name='date'>
+			<p> arrival date: </p>
+			<input type='date' name='date'>
 			<input type='submit' value='submit'>
 		</form>
 	</body>
