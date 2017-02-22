@@ -60,6 +60,7 @@ def create_user():
 @app.route('/login', methods=['GET','POST'])
 def login():
 	if request.method == 'GET':
+		
 		return render_template('login.html')
 	elif request.method == 'POST':
 		usn = request.form['username']		
@@ -90,10 +91,31 @@ def login():
 
 @app.route('/add_facility', methods=['GET', 'POST'])
 def add_facility():
+	# need to store the list of facilites as session data
+	SQL = "SELECT fcode, common_name FROM facilities"
+	cur.execute(SQL)
+	res = cur.fetchall()
+	keys = ('fcode', 'common_name')
+	session['fac_list'] = [dict(zip(keys, row)) for row in res]
+	
 	if request.method == 'GET':
 		return render_template('add_facility.html')
 	elif request.method == 'POST':
-		return			
+		fcode = request.form['fcode']
+		common_name = request.form['common_name']
+		
+		#check if in db
+		SQL = "SELECT fcode, common_name from facilities WHERE fcode = '{}' AND common_name = '{}'".format(fcode, common_name)
+		cur.execute(SQL)
+		res = cur.fetchall()
+		if not res: #if not found in db, add it
+			SQL = "INSERT INTO facilities (fcode, common_name) VALUES (%s, %s)"
+			data = (fcode, common_name)
+			cur.execute(SQL, data)
+			conn.commit()
+			return redirect(url_for('add_facility'))
+		elif fcode == res[0][0] and common_name == res[0][1]:
+			return render_template('fac_duplicate.html')
 
 
 		
