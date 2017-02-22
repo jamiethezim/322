@@ -1,0 +1,29 @@
+<html>
+	<head></head>
+	<body>
+		<h2> -- Facilities currently in database -- </h2>
+		<table>
+			{%for entry in session.fac_list%}
+			<tr>
+				<td> {{entry.fcode}} </td>
+				<td> {{entry.common_name}} </td>
+			</tr>
+			{% endfor%}
+		</table>
+		<h2> Add a Facility: </h2>
+		<form action="{{url_for('add_facility')}}" method="POST">
+			<p>facility common name </p>
+			<select name='common_name'>
+				<option value='DC'> DC </option>
+				<option value='HQ'> HQ </option>
+				<option value='SPNV'> SPNV </option>
+				<option value='MB005'> MB005 </option>
+				<option value='NC'> NC </option>
+			</select>
+			<p>fcode: </p>
+			<input type='text' name='fcode'>
+			<input type='submit' value='submit'>
+		</form>
+	</body>
+</html>
+
