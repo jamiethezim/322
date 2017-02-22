@@ -3,8 +3,15 @@
 	<body>
 		<h2> create new user - type in a username and password to get added </h2>
 		<form action="{{url_for('create_user')}}" method="POST">
+			<p>username: </p>
 			<input type='text' name='username'>
+			<p>password: </p>
 			<input type='text' name='password'>
+			<p>role: </p>
+			<select name='role'>
+				<option value='logistics officer'> Logistics Officer</option>
+				<option value='facilities officer'> Facilities Officer </option>
+			</select>
 			<input type='submit' value='submit'>
 		</form>
 	</body>
