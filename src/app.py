@@ -20,20 +20,32 @@ def create_user():
 		#get login credentials locally
 		usn = request.form['username']
 		pwd = request.form['password']
-		
+		rol = request.form['role']
 		#check if user in db
 		SQL = "SELECT username, password FROM logins where username = '{}' AND password = '{}'".format(usn, pwd)
 		cur.execute(SQL)
-		res = cur.fetchall()
+		res1 = cur.fetchall()
+		#check if role in db
+		SQL = "SELECT role_pk from roles where role = '{}'".format(rol)
+		cur.execute(SQL)
+		res2 = cur.fetchall()
 
-		#if user not in db, add credentials, render html saying user added
-		if not res: #no match
-			print('no user')
-			SQL = "INSERT INTO logins (username, password) VALUES (%s, %s)"
-			data = (usn, pwd)
+		if not res2: #role type not in db
+			SQL = "INSERT INTO roles (role) VALUES (%s) RETURNING role_pk"
+			data = (rol,)
+			cur.execute(SQL, data)
+			role_pk = cur.fetchone()[0]
+			conn.commit()
+		else:
+			role_pk = res2[0]
+
+
+		#if user/pwd not in db, add them, return html saying they were added
+		if not res1: #no match
+			SQL = "INSERT INTO logins (username, password, role_fk) VALUES (%s, %s, %s)"
+			data = (usn, pwd, role_pk)
 			cur.execute(SQL, data)
 			conn.commit()
-			print('sql insert successful')
 			return render_template('user_added.html')
 
 		#this elif condition is a little goofy... res is a list of tuples,
@@ -41,7 +53,7 @@ def create_user():
 		#the sql query should only ever find at most 1 result, so it's a list of one tuple
 		
 		#otherwise user in db and render html saying user exists
-		elif usn == res[0][0] and pwd == res[0][1]:
+		elif usn == res1[0][0] and pwd == res1[0][1]:
 			return render_template('yay.html')
 
 @app.route('/', methods=['GET','POST'])
@@ -75,6 +87,15 @@ def login():
 			print("found match: {} {} {}".format(found_usn, found_pwd, pk1))
 			session['username'] = usn
 			return redirect((url_for('dashboard')))
+
+@app.route('/add_facility', methods=['GET', 'POST'])
+def add_facility():
+	if request.method == 'GET':
+		return render_template('add_facility.html')
+	elif request.method == 'POST':
+		return			
+
+
 		
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
