@@ -193,5 +193,25 @@ def dispose_asset():
 			return render_template('dashboard.html')
 
 
+@app.route('/asset_report', methods=['GET', 'POST'])
+def asset_report():
+	if request.method == 'GET':
+		return render_template('asset_report.html')
+	elif request.method == 'POST':
+		loc = request.form['common_name']
+		time = request.form['date']
+		if not time: #if no time is specified in text field, code breaks
+			return redirect(url_for('asset_report'))		
+		SQL = "SELECT asset_tag, description, common_name, arrive_dt FROM assets JOIN asset_at ON assets.asset_pk = asset_at.asset_fk JOIN facilities ON asset_at.facility_fk = facilities.facility_pk WHERE arrive_dt = '{}'".format(time)
+		if loc != '': #if a location was specified
+			SQL += " AND common_name = '{}'".format(loc)
+		cur.execute(SQL)
+		res = cur.fetchall()
+		keys = ('asset_tag', 'description', 'common_name', 'arrive_dt')
+		session['report'] = [dict(zip(keys, row)) for row in res]
+		return redirect(url_for('asset_report'))
+
+
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080)
