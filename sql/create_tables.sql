@@ -35,3 +35,27 @@ CREATE TABLE asset_at (
 );
 -- asset_at table maps assets table to facilities table
 -- with asset_fk and facility_fk
+
+CREATE TABLE requests (
+	request_pk serial primary key,
+	user_fk integer REFERENCES logins(user_pk),
+	request_dt timestamp,
+	src_fac integer REFERENCES facilities(facility_pk),
+	dest_fac integer REFERENCES facilities(facility_pk),
+	asset integer REFERENCES assets(asset_pk),
+	approver integer REFERENCES logins(user_pk),
+	approval_dt timestamp
+);
+
+CREATE TABLE in_transit(
+	asset integer REFERENCES assets(asset_pk),
+	src_fac integer REFERENCES facilities(facility_pk),
+	dest_fac integer REFERENCES facilities(facility_pk),
+	unload_dt timestamp
+);
+-- These tables connect a lot of already existing data, so lot of references
+-- Wrote the transfer requests in its own table
+-- Wrote assets currently in motion into its own table
+-- For both I reference asset_pk so that if an asset is requested to be moved
+-- and then moved, asset_pk is more granular in referencing exactly which 
+-- item should be moved
