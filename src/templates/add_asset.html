@@ -1,0 +1,33 @@
+<html>
+	<head></head>
+	<body>
+		<h2> -- Assets currently in database -- </h2>
+		<table>
+			{%for entry in session.asset_list%}
+			<tr>
+				<td> {{entry.asset_tag}} </td>
+				<td> {{entry.description}} </td>
+			</tr>
+			{% endfor%}
+		</table>
+		<h2> Add an Asset: </h2>
+		<form action="{{url_for('add_asset')}}" method="POST">
+			<p>asset location </p>
+			<select name='common_name'>
+				<option value='DC'> DC </option>
+				<option value='HQ'> HQ </option>
+				<option value='SPNV'> SPNV </option>
+				<option value='MB005'> MB005 </option>
+				<option value='NC'> NC </option>
+			</select>
+			<p>asset tag: </p>
+			<input type='text' name='asset_tag'>
+			<p> asset description: </p>
+			<input type='text' name='description'>
+			<p> arrival date: In form MM/DD/YYYY ie "01/02/2017" </p>
+			<input type='text' name='date'>
+			<input type='submit' value='submit'>
+		</form>
+	</body>
+</html>
+
