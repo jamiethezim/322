@@ -2,6 +2,14 @@
 	<head></head>
 	<body>
 		<h2> DASHBOARD </h2>
-		<p>Welcome {{session.username}} </p>
+		<p>Welcome {{session.username}}, {{session.position}} </p>
+			<a href="{{url_for('asset_report')}}">Asset Report </a> <br>
+			<a href="{{url_for('transfer_report')}}">Transfer Report</a><br>
+			<a href="{{url_for('add_asset')}}">Add New Asset</a><br>
+			<a href="{{url_for('add_facility')}}">Add New Facility</a><br>
+			{% if session.position == 'logistics officer' %}
+				<a href="{{url_for('dispose_asset')}}">Dispose Asset</a><br>
+				<a href="{{url_for('transfer_req')}}">Request an Asset Transfer</a>
+			{%endif%}
 	</body>
 </html>
