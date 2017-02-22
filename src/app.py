@@ -103,7 +103,7 @@ def add_facility():
 	elif request.method == 'POST':
 		fcode = request.form['fcode']
 		common_name = request.form['common_name']
-		
+		print(request.form)		
 		#check if in db
 		SQL = "SELECT fcode, common_name from facilities WHERE fcode = '{}' AND common_name = '{}'".format(fcode, common_name)
 		cur.execute(SQL)
@@ -124,6 +124,47 @@ def dashboard():
 	return render_template('dashboard.html')
 
 
+@app.route('/add_asset', methods=['GET', 'POST'])
+def add_asset():
+	SQL = "SELECT asset_tag, description FROM assets"
+	cur.execute(SQL)
+	res = cur.fetchall()
+	keys = ('asset_tag', 'description')
+	session['asset_list'] = [dict(zip(keys, row)) for row in res]
+	if request.method == 'GET':
+		return render_template('add_asset.html')
+	elif request.method == 'POST':
+		tag = request.form['asset_tag']
+		loc = request.form['common_name']
+		descr = request.form['description']
+		time = request.form['date']
+		print(tag, loc, descr, time)
+
+		#check if asset tag in db
+		SQL = "SELECT asset_tag from assets WHERE asset_tag = '{}'".format(tag)
+		cur.execute(SQL)
+		res = cur.fetchall()
+		if not res: #if asset not in db, add it
+			SQL = "INSERT INTO assets (asset_tag, description) VALUES (%s, %s) RETURNING asset_pk"
+			data = (tag, descr)
+			cur.execute(SQL, data)
+			asset_pk = cur.fetchone()[0]
+			conn.commit()
+			
+			#find the facility key where the asset should go
+			SQL = "SELECT facility_pk from facilities WHERE common_name = '{}'".format(loc)
+			cur.execute(SQL)
+			facility_pk = cur.fetchone()[0]
+			print(facility_pk)
+
+			#link asset to its location in asset_at table
+			SQL = "INSERT INTO asset_at VALUES (%s, %s, %s)"
+			data = (asset_pk, facility_pk, time)
+			cur.execute(SQL, data)
+			conn.commit()
+			return redirect(url_for('add_asset'))
+		elif tag == res[0][0]:
+			return render_template('asset_dup.html')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080)
