@@ -38,7 +38,7 @@ CREATE TABLE asset_at (
 
 CREATE TABLE requests (
 	request_pk serial primary key,
-	user_fk integer REFERENCES logins(user_pk),
+	requestor integer REFERENCES logins(user_pk),
 	request_dt timestamp,
 	src_fac integer REFERENCES facilities(facility_pk),
 	dest_fac integer REFERENCES facilities(facility_pk),
