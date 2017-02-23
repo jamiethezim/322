@@ -12,13 +12,25 @@
 				<a href="{{url_for('transfer_req')}}">Request an Asset Transfer</a>
 			{%endif%}
 		<br><br>
-		<h2> Needs approval </h2>
-		<table>
-			{% if session.position == 'facilities officer' %}
-				{% for r in data%}
-					<tr><td>Request number: {{r['asset']}} <a href="{{url_for('approve_req')}}?request_pk={{r['request_pk']}}">Approve</a><td></tr>
-				{% endfor %}
-			{% endif %}
-		</table>
+
+			
+
+		{% if session.position == 'facilities officer' %}
+			<h2> Needs approval </h2>
+			<table>
+			{% for r in data%}
+				<tr><td>Request number: {{r['asset']}} <a href="{{url_for('approve_req')}}?request_pk={{r['request_pk']}}">Approve</a></td></tr>
+			{% endfor %}
+			</table>
+		{% endif %}
+		
+		{% if session.position == 'logistics officer' %}
+			<h2> Needs times set </h2>
+			<table>
+			{% for r in data %}
+				<tr><td> Set number: {{r['asset']}} <a href="{{url_for('update_transit')}}?asset={{r['asset']}}">Set</a></td>
+			{% endfor %}
+			</table>
+		{% endif%}
 	</body>
 </html>
