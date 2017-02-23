@@ -6,7 +6,6 @@ import sys
 conn = psycopg2.connect(dbname=sys.argv[1], host='127.0.0.1', port=5432) #the host and port are default and hardcoded here
 cur = conn.cursor()
 
-
 def get_stuff():
 	'''
 	reports is a list of the filenames we will cycle through - filenames are conveniently named after the corresponding table in the SQL db
@@ -21,13 +20,22 @@ def get_stuff():
 		'users': ['username', 'password', 'role'],
 		'facilities': ['fcode', 'common_name'],
 		'assets': ['asset_tag', 'description', 'common_name', 'arrive_dt', 'depart_dt'],
-		'transfers': ['asset', 'username', 'request_dt', 'approver', 'approval_dt', 'src_fac', 'dest_fac', 'load_dt', 'unload_dt']
+		'transfers': ['asset', 'requestor', 'request_dt', 'approver', 'approval_dt', 'src_fac', 'dest_fac', 'load_dt', 'unload_dt']
 	}
 	SQLdict = {
 		'users': "SELECT username, password, role FROM logins JOIN roles ON role_fk = role_pk",
 		'facilities': 'SELECT fcode, common_name from facilities',
-		'assets': "SELECT asset_tag, description, common_name, arrive_dt, depart_dt FROM assets JOIN asset_at ON asset_pk = asset_fk JOIN facilities ON facility_fk = facility_pk",
-		'transfers': "SELECT in_transit.asset, username, request_dt, approver, approval_dt, in_transit.src_fac, in_transit.dest_fac, load_dt, unload_dt FROM requests JOIN in_transit on requests.asset = in_transit.asset JOIN logins on requests.requestor = logins.user_pk"
+		'assets': ('SELECT asset_tag, description, common_name, arrive_dt, depart_dt '
+			'FROM assets ' 
+			'JOIN asset_at ON asset_pk = asset_fk '
+			'JOIN facilities ON facility_fk = facility_pk'),
+		'transfers': ('SELECT in_transit.asset, L.username, request_dt, M.username, approval_dt, S.fcode, D.fcode, load_dt, unload_dt '
+			'FROM requests '
+			'INNER JOIN logins as L on requests.requestor = L.user_pk '
+			'INNER JOIN logins as M on requests.approver = M.user_pk '
+			'JOIN in_transit on requests.asset = in_transit.asset '
+			'INNER JOIN facilities as S on in_transit.src_fac = S.facility_pk '
+			'INNER JOIN facilities as D on in_transit.dest_fac = D.facility_pk')
 	}
 	
 	for filename in reports:
