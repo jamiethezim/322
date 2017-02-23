@@ -84,7 +84,7 @@ def login():
 		pk1 = res1[0][0]
 		pk2 = res2[0][0]
 		if usn == found_usn and pwd == found_pwd and pk1 == pk2:
-			print("found match: {} {} {}".format(found_usn, found_pwd, pk1))
+			#print("found match: {} {} {}".format(found_usn, found_pwd, pk1))
 			session['username'] = usn
 			session['position'] = user_is(pk1)
 			return redirect((url_for('dashboard')))
@@ -139,7 +139,10 @@ def add_facility():
 		
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-	data = need_approval()
+	if session['position'] == 'facilities officer':
+		data = need_approval()
+	elif session['position'] == 'logistics officer':
+		data = need_time()
 	return render_template('dashboard.html', data=data)
 
 #helper function generate list of assets needing approval
@@ -153,6 +156,15 @@ def need_approval():
 	keys = ('request_pk', 'requestor', 'request_dt', 'src_fac', 'dest_fac', 'asset', 'approver', 'approval_date')
 	unapproved = [dict(zip(keys, r)) for r in res]
 	return unapproved
+def need_time():
+	''' returns a list of in_transit table entries that need load and unload times set
+	'''
+	SQL = "SELECT * FROM in_transit WHERE load_dt IS NULL AND unload_dt IS NULL"
+	cur.execute(SQL)
+	res = cur.fetchall()
+	keys = ('asset', 'src_fac', 'dest_fac', 'load_dt', 'unload_dt')
+	untime = [dict(zip(keys,r)) for r in res]
+	return untime
 
 
 @app.route('/add_asset', methods=['GET', 'POST'])
@@ -316,10 +328,8 @@ def approve_req():
 		else:
 			data = dict()
 			data['request_pk'] = req_num
-			print('GOT inner loop')
 			return render_template('approve_req.html', data=[data]) #has to send a list of dictionaries to html page
 	if request.method == 'POST':
-		print('POSTED')
 		accepted = request.form['choose']
 		req_num = request.form['request_pk']
 		print('accepted: ' + accepted + '  request number:  ' + req_num) #help debug
@@ -331,9 +341,48 @@ def approve_req():
 			SQL = "UPDATE requests SET approver = %s, approval_dt = %s WHERE request_pk = '{}'".format(req_num)
 			data = (get_user_pk(session['username']), datetime.datetime.now())
 			cur.execute(SQL, data)
+			
+			#find the entry in request table	
+			SQL = "SELECT asset, src_fac, dest_fac from requests where request_pk = '{}'".format(req_num)
+			cur.execute(SQL)
+			res = cur.fetchall()
+
+			# insert into in_transit table
+			SQL = "INSERT INTO in_transit (asset, src_fac, dest_fac) VALUES (%s, %s, %s)"
+			data = (res[0][0], res[0][1], res[0][2])
+			cur.execute(SQL, data)
 		conn.commit()
 		return redirect(url_for('dashboard'))
 		
+
+
+@app.route('/update_transit', methods=['GET', 'POST'])
+def update_transit():
+	if session['position'] != 'logistics officer':
+		return '<!DOCTYPE HTML> Uh-oh! Only logistics officers can update transit times'
+	if request.method == 'GET' and 'asset' in request.args:
+		asset = int(request.args['asset'])
+		SQL = "SELECT unload_dt from in_transit WHERE asset = '{}'".format(asset)
+		cur.execute(SQL)
+		res = cur.fetchall()
+		print(res)
+		if (not res) or (not res[0][0] is None): #if asset is unfound in transit table or the unload time is already set (not none)
+			return '<!DOCTYPE HTML> Invalid request - not in transit table or unload time is already set'
+		else:	
+			print('in else loop')
+			data = dict()
+			data['asset'] = asset
+			return render_template('update_transit.html', data = [data])
+	if request.method == 'POST':
+		asset = request.form['asset'] #a primary key identifier
+		load = request.form['load_date']
+		unload = request.form['unload_date']
+		
+		SQL = "UPDATE in_transit SET load_dt = %s, unload_dt = %s WHERE asset = '{}'".format(asset)
+		data = (load, unload)
+		cur.execute(SQL, data)
+		conn.commit()
+		return redirect(url_for('dashboard'))			
 
 
 
