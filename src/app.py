@@ -11,7 +11,7 @@ app.secret_key = 'Jamie'
 conn = psycopg2.connect(dbname=dbname, port=dbport, host=dbhost)
 cur = conn.cursor()
 
-@app.route('/create_user', methods=['GET', 'POST'])
+#@app.route('/create_user', methods=['GET', 'POST'])
 def create_user():
 	if request.method == 'GET':
 		#loops back to itself
@@ -55,6 +55,8 @@ def create_user():
 		#otherwise user in db and render html saying user exists
 		elif usn == res1[0][0] and pwd == res1[0][1]:
 			return render_template('yay.html')
+
+@app.route
 
 @app.route('/', methods=['GET','POST'])
 @app.route('/login', methods=['GET','POST'])
