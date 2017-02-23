@@ -51,6 +51,7 @@ CREATE TABLE in_transit(
 	asset integer REFERENCES assets(asset_pk),
 	src_fac integer REFERENCES facilities(facility_pk),
 	dest_fac integer REFERENCES facilities(facility_pk),
+	load_dt timestamp,
 	unload_dt timestamp
 );
 -- These tables connect a lot of already existing data, so lot of references
