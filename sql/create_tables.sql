@@ -11,8 +11,8 @@ CREATE TABLE logins (
 	user_pk serial primary key,
 	username varchar(16), --usernames are <= 16 chars
 	password varchar (16), --passwords are <= 16 chars
-	role_fk integer REFERENCES roles(role_pk) --users can only have one role, but could have potentially one of many different kinds of roles, so I created another table of roles
-);
+	role_fk integer REFERENCES roles(role_pk), --users can only have one role, but could have potentially one of many different kinds of roles, so I created another table of roles
+	active boolean);
 
 CREATE TABLE assets (
 	asset_pk serial primary key,
