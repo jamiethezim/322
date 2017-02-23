@@ -96,6 +96,15 @@ def user_is(user_pk):
 	cur.execute(SQL, data)
 	return cur.fetchone()[0]
 
+def get_user_pk(username):
+	'''input -> string
+	output -> int representing user's primary serial key
+	'''
+	SQL = "SELECT user_pk from logins WHERE username = '{}'".format(username)
+	cur.execute(SQL)
+	res = cur.fetchone()[0]
+	print('from function: ' + str(res))
+	return res
 
 
 @app.route('/add_facility', methods=['GET', 'POST'])
@@ -130,7 +139,20 @@ def add_facility():
 		
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-	return render_template('dashboard.html')
+	data = need_approval()
+	return render_template('dashboard.html', data=data)
+
+#helper function generate list of assets needing approval
+def need_approval():
+	'''
+	returns a list of asset transfer requests that need approval
+	'''
+	SQL = "SELECT * FROM requests WHERE approval_dt IS NULL"
+	cur.execute(SQL)
+	res = cur.fetchall()
+	keys = ('request_pk', 'requestor', 'request_dt', 'src_fac', 'dest_fac', 'asset', 'approver', 'approval_date')
+	unapproved = [dict(zip(keys, r)) for r in res]
+	return unapproved
 
 
 @app.route('/add_asset', methods=['GET', 'POST'])
@@ -276,6 +298,44 @@ def transfer_req():
 		cur.execute(SQL, data)
 		conn.commit()
 		return '<!DOCTYPE HTML> transfer request successfully submitted'
+
+
+
+
+#APPROVE TRANSFER REQUESTS
+@app.route('/approve_req', methods=['GET', 'POST'])
+def approve_req():
+	if session['position'] != 'facilities officer':
+		return '<!DOCTYPE HTML> Whoops! Only facilities officers can approve transfer requests'
+	if request.method == 'GET' and 'request_pk' in request.args:
+		req_num = int(request.args['request_pk'])
+		SQL = "SELECT approval_dt FROM requests WHERE request_pk = '{}'".format(req_num)
+		cur.execute(SQL)
+		if not cur.fetchone()[0] is None: #if the approval date has been set
+			return '<!DOCTYPE HTML> this request has already been approved'
+		else:
+			data = dict()
+			data['request_pk'] = req_num
+			print('GOT inner loop')
+			return render_template('approve_req.html', data=[data]) #has to send a list of dictionaries to html page
+	if request.method == 'POST':
+		print('POSTED')
+		accepted = request.form['choose']
+		req_num = request.form['request_pk']
+		print('accepted: ' + accepted + '  request number:  ' + req_num) #help debug
+		
+		if accepted == 'NO': #if user rejected request
+			SQL = "DELETE FROM requests WHERE request_pk = '{}'".format(req_num)
+			cur.execute(SQL)
+		elif accepted == 'YES':
+			SQL = "UPDATE requests SET approver = %s, approval_dt = %s WHERE request_pk = '{}'".format(req_num)
+			data = (get_user_pk(session['username']), datetime.datetime.now())
+			cur.execute(SQL, data)
+		conn.commit()
+		return redirect(url_for('dashboard'))
+		
+
+
 
 
 #Extra credit - skeleton implemented only to avoid bugs
