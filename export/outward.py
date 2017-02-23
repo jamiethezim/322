@@ -6,37 +6,16 @@ import sys
 conn = psycopg2.connect(dbname=sys.argv[1], host='127.0.0.1', port=5432) #the host and port are default and hardcoded here
 cur = conn.cursor()
 
-def get_users():
-	''' this file takes no arguments, writes a file, but does not return the file
-	'''
-	SQL = "SELECT username, password, role FROM logins JOIN roles ON role_fk = role_pk"
-	cur.execute(SQL)
-	res = cur.fetchall()
-	with open('users.csv', 'w') as users:
-		fieldnames = ['username', 'password', 'role', 'active']
-		writer = csv.DictWriter(users, fieldnames=fieldnames)
-		writer.writeheader()
-		for entry in res:
-			writer.writerow({'username': entry[0], 'password': entry[1], 'role':entry[2], 'active': True})
-
-def get_facs():
-	''' this file takes no arguments, writes a file, but does not return the file
-	'''
-	SQL = "SELECT fcode, common_name FROM facilities"
-	cur.execute(SQL)
-	res = cur.fetchall()
-	with open('facilities.csv', 'w') as facilities:
-		fieldnames = ['fcode', 'common_name']
-		writer = csv.DictWriter(facilities, fieldnames=fieldnames)
-		writer.writeheader()
-		for entry in res:
-			writer.writerow({'fcode':entry[0], 'common_name':entry[1]})
-
-def get_assets():
-	SQL = "SELECT asset_tag, description, common_name, arrive_dt, depart_dt FROM assets JOIN asset_at ON asset_pk = asset_fk JOIN facilities ON facility_fk = facility_pk"
-	cur.execute(SQL)
 
 def get_stuff():
+	'''
+	reports is a list of the filenames we will cycle through - filenames are conveniently named after the corresponding table in the SQL db
+	fields is a map from the file name to the column headers that need to be in the csv file
+	SQLdict is a map from the file name to the SQL query that will get the information that should go in the file
+	
+	game plan: cycle through all the files, for each one, query the database, get and write the appropriate headers, zip together the
+	column headers and sql data, throw it into the dictionary, and then write it to the file
+	'''
 	reports = ['users', 'facilities', 'assets', 'transfers']
 	fields = {
 		'users': ['username', 'password', 'role'],
