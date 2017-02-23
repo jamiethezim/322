@@ -381,6 +381,9 @@ def update_transit():
 		SQL = "UPDATE in_transit SET load_dt = %s, unload_dt = %s WHERE asset = '{}'".format(asset)
 		data = (load, unload)
 		cur.execute(SQL, data)
+		SQL = "UPDATE asset_at SET arrive_dt = %s, depart_dt = %s WHERE asset_fk = '{}'".format(asset)
+		data = (unload, load)
+		cur.execute(SQL, data)
 		conn.commit()
 		return redirect(url_for('dashboard'))			
 
