@@ -19,8 +19,8 @@ def get_stuff():
 	fields = {
 		'users': ['username', 'password', 'role'],
 		'facilities': ['fcode', 'common_name'],
-		'assets': ['asset_tag', 'description', 'common_name', 'arrive_dt', 'depart_dt'],
-		'transfers': ['asset', 'requestor', 'request_dt', 'approver', 'approval_dt', 'src_fac', 'dest_fac', 'load_dt', 'unload_dt']
+		'assets': ['asset_tag', 'description', 'facility', 'acquired', 'disposed'],
+		'transfers': ['asset_tag', 'request_by', 'request_dt', 'approve_by', 'approve_dt', 'source', 'destination', 'load_dt', 'unload_dt']
 	}
 	SQLdict = {
 		'users': "SELECT username, password, role FROM logins JOIN roles ON role_fk = role_pk",
