@@ -52,15 +52,15 @@ def import_assets(assets_file):
 			asset_pk = cur.fetchone()[0]
 
 			#get the facility_fk from the common name
-			SQL = "Select facility_pk from facilities where common_name = %s"
-			data = (line['common_name'],)
+			SQL = "Select facility_pk from facilities where fcode = %s"
+			data = (line['facility'],)
 			cur.execute(SQL, data)
 			facility_pk = cur.fetchone()[0]
 
 			#insert into asset_at table
 			SQL = "INSERT INTO asset_at (asset_fk, facility_fk, arrive_dt, depart_dt) VALUES (%s, %s, %s, %s)"
-			dep = line['depart_dt'] if line['depart_dt'] != "" else None #ternary - timestamp is null if the string from csv is empty string
-			data = (asset_pk, facility_pk, line['arrive_dt'], dep)
+			dep = line['disposed'] if line['disposed'] != "NULL" else None #ternary - timestamp is null if the string from csv is empty string
+			data = (asset_pk, facility_pk, line['acquired'], dep)
 			cur.execute(SQL, data)
 			
 			conn.commit()
@@ -70,29 +70,34 @@ def import_transfers(transfer_file):
 		reader = csv.DictReader(transfer_file)
 		for line in reader:
 			#needs to get primary key identifiers for requestor and approver (currently their username)
-			SQL = "SELECT user_pk from logins where username = '{}'".format(line['requestor'])
+			SQL = "SELECT user_pk from logins where username = '{}'".format(line['request_by'])
 			cur.execute(SQL)
 			reqr = cur.fetchone()[0]
-			SQL = "SELECT user_pk from logins where username = '{}'".format(line['approver'])
+			SQL = "SELECT user_pk from logins where username = '{}'".format(line['approve_by'])
 			cur.execute(SQL)
 			appr = cur.fetchone()[0]
 			
 			#need to get facility fk identifier for src_fac and dest_fact (currently in csv as fcode identifier)
-			SQL = "Select facility_pk from facilities where fcode = '{}'".format(line['src_fac'])
+			SQL = "Select facility_pk from facilities where fcode = '{}'".format(line['source'])
 			cur.execute(SQL)
 			src = cur.fetchone()[0]
-			SQL = "Select facility_pk from facilities where fcode = '{}'".format(line['dest_fac'])
+			SQL = "Select facility_pk from facilities where fcode = '{}'".format(line['destination'])
 			cur.execute(SQL)
 			dest = cur.fetchone()[0]
+
+			#need to get asset_fk identifier from the asset_tag
+			SQL = "Select asset_pk from assets where asset_tag = '{}'".format(line['asset_tag'])
+			cur.execute(SQL)
+			asset_pk = cur.fetchone()[0]
 			
 			#import data into requests table
 			SQL = "INSERT INTO requests (requestor, request_dt, src_fac, dest_fac, asset, approver, approval_dt) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-			data = (reqr, line['request_dt'], src, dest, line['asset'], appr, line['approval_dt'])
+			data = (reqr, line['request_dt'], src, dest, asset_pk, appr, line['approve_dt'])
 			cur.execute(SQL, data)
 
 			#import data into in_transit table
 			SQL = "INSERT INTO in_transit (asset, src_fac, dest_fac, load_dt, unload_dt) VALUES (%s, %s, %s, %s, %s)"
-			data = (line['asset'], src, dest, line['load_dt'], line['unload_dt'])
+			data = (asset_pk, src, dest, line['load_dt'], line['unload_dt'])
 			cur.execute(SQL, data)
 		conn.commit()
 
