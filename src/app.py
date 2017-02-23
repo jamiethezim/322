@@ -328,7 +328,7 @@ def approve_req():
 		else:
 			data = dict()
 			data['request_pk'] = req_num
-			return render_template('approve_req.html', data=[data]) #has to send a list of dictionaries to html page
+			return render_template('approve_req.html', data=data) #has to send a list of dictionaries to html page
 	if request.method == 'POST':
 		accepted = request.form['choose']
 		req_num = request.form['request_pk']
@@ -383,7 +383,6 @@ def update_transit():
 		cur.execute(SQL, data)
 		conn.commit()
 		return redirect(url_for('dashboard'))			
-
 
 
 
