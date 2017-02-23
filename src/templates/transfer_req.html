@@ -1,0 +1,28 @@
+<html>
+	<head></head>
+	<body>
+		<h2> Transfer Assets </h2>
+		<form action="{{url_for('transfer_req')}}" method="POST">
+			<p>asset tag: </p>
+			<input type='text' name='asset_tag'>
+			<p> Source facility: <p>
+			<select name='src_common_name'>
+				<option value='DC'> DC </option>
+				<option value='HQ'> HQ </option>
+				<option value='SPNV'> SPNV </option>
+				<option value='MB005'> MB005 </option>
+				<option value='NC'> NC </option>
+			</select>
+			<p> Destination facility: <p>
+			<select name='dest_common_name'>
+				<option value='DC'> DC </option>
+				<option value='HQ'> HQ </option>
+				<option value='SPNV'> SPNV </option>
+				<option value='MB005'> MB005 </option>
+				<option value='NC'> NC </option>
+			</select>
+			<input type='submit' value='submit'>
+		</form>
+	</body>
+</html>
+

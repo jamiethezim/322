@@ -1,0 +1,35 @@
+<html>
+	<head></head>
+	<body>
+		<h2> Transfer Report </h2>
+		<p> Currently unavailable -- Jamie is working on this and will do it soon! </p>
+		<!--
+		<form action="{{url_for('asset_report')}}" method="POST">
+			<p>facility common name </p>
+			<select name='common_name'>
+				<option value=''> </option> <!-- this option indicates all facilities -->
+				<option value='DC'> DC </option>
+				<option value='HQ'> HQ </option>
+				<option value='SPNV'> SPNV </option>
+				<option value='MB005'> MB005 </option>
+				<option value='NC'> NC </option>
+			</select>
+			<p>date in format: </p>
+			<input type='date' name='date'>
+			<input type='submit' value='submit'>
+		</form>
+
+		<table>
+			{% for entry in session.report%}
+			<tr>
+				<td> {{entry.asset_tag}} </td>
+				<td> {{entry.description}} </td>
+				<td> {{entry.common_name}} </td>
+				<td> {{entry.arrive_dt}} </td>
+			</tr>
+			{% endfor %}
+		</table>
+		//-->
+	</body>
+</html>
+

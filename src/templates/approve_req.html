@@ -1,0 +1,17 @@
+<html>
+	<head></head>
+	<body>
+		<h2> Do you Approve? </h2>
+		<form action="{{url_for('approve_req')}}" method="POST">
+			<select name='choose'>
+				<option value='YES'> YES </option>
+				<option value='NO'> NO </option>
+			</select>
+			{% for r in data %}
+				<input type='text' name='request_pk' value='{{r['request_pk']}}'>
+			{% endfor %}
+			<input type='submit' value='submit'>
+		</form>
+	</body>
+</html>
+
