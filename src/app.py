@@ -56,31 +56,41 @@ def create_user():
 		elif usn == res1[0][0] and pwd == res1[0][1]:
 			return render_template('yay.html')
 
-@app.route('/activate_user', methods=['GET', 'POST'])
+@app.route('/activate_user', methods=['POST'])
 def activate_user():
 	#it is implied that this function can only be called by POST request
 	usn = request.form['username']
 	pwd = request.form['password']
-	active = request.form['active']
-	
-	SQL = "SELECT username, password, active FROM logins WHERE username = %s AND password = %s"
-	data = (usn, pwd)
+	title = request.form['title']
+	titles = {'logofc': 'logistics officer', 'facofc': 'facilities officer'}
+	SQL = "SELECT username, password, role_fk, active FROM logins WHERE username = %s" #don't specify password because it will be overwritten later
+	data = (usn,)
 	cur.execute(SQL, data)
 	res = cur.fetchall()
 
 	if not res: #if no user is found in db, put them in with active status
-		SQL = "INSERT INTO logins (username, password, active) VALUES (%s, %s, %s)"
-		data = (usn, pwd, True)
+
+		#but first we have to get the right role for them
+		SQL = "SELECT role_pk from roles WHERE role = %s"
+		data = (titles[title],)
+		print(data)
+		cur.execute(SQL,data)
+		office = cur.fetchone()[0] #role primary key identifier
+		print(office)
+		
+		SQL = "INSERT INTO logins (username, password, role_fk, active) VALUES (%s, %s, %s, %s)"
+		data = (usn, pwd, office, True)
 		cur.execute(SQL, data)
+		conn.commit() #have to commit now because it can't happen after function return
 		return 'user {} was successfully added to the database and activated'.format(usn)
 	else: #user was found
-		#update password
+		#update password, they already have a role
 		#regardless of being active or not, set them to be active anyway
 		SQL = "UPDATE logins SET password = %s, active = TRUE WHERE username = %s"
 		data = (pwd, usn)
 		cur.execute(SQL, data)
+		conn.commit()
 		return "user {}'s password was reset and they are active".format(usn)
-	conn.commit()
 
 
 #helper function - prevent a revoked user from accessing pages
@@ -102,7 +112,8 @@ def revoke_user():
 	usn = request.form['username']
 	SQL = "UPDATE logins SET active = FALSE WHERE username = %s"
 	data = (usn,)
-	cur.execute(SQL)
+	cur.execute(SQL, data)
+	conn.commit()
 	#even if user is not in db, this update will do nothing, and it certainly won't create a new entry in logins table
 	return 'User {} has been revoked and can no longer access this site'.format(usn)
 
