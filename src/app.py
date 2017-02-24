@@ -56,7 +56,57 @@ def create_user():
 		elif usn == res1[0][0] and pwd == res1[0][1]:
 			return render_template('yay.html')
 
-@app.route
+@app.route('/activate_user', methods=['GET', 'POST'])
+def activate_user():
+	#it is implied that this function can only be called by POST request
+	usn = request.form['username']
+	pwd = request.form['password']
+	active = request.form['active']
+	
+	SQL = "SELECT username, password, active FROM logins WHERE username = %s AND password = %s"
+	data = (usn, pwd)
+	cur.execute(SQL, data)
+	res = cur.fetchall()
+
+	if not res: #if no user is found in db, put them in with active status
+		SQL = "INSERT INTO logins (username, password, active) VALUES (%s, %s, %s)"
+		data = (usn, pwd, True)
+		cur.execute(SQL, data)
+		return 'user {} was successfully added to the database and activated'.format(usn)
+	else: #user was found
+		#update password
+		#regardless of being active or not, set them to be active anyway
+		SQL = "UPDATE logins SET password = %s, active = TRUE WHERE username = %s"
+		data = (pwd, usn)
+		cur.execute(SQL, data)
+		return "user {}'s password was reset and they are active".format(usn)
+	conn.commit()
+
+
+#helper function - prevent a revoked user from accessing pages
+def check_access():
+	if not session['username']: #if no attempt to log in has been made
+		return False
+	SQL = "SELECT active FROM logins WHERE username = %s"
+	data = (session['username'],)
+	cur.execute(SQL, data)
+	res = cur.fetchone()[0]
+	if res == 'TRUE':
+		return True
+	return False
+
+
+@app.route('/revoke_user', methods=['GET', 'POST'])
+def revoke_user():
+	#it is implied that /revoke user will only be access via POST request
+	usn = request.form['username']
+	SQL = "UPDATE logins SET active = FALSE WHERE username = %s"
+	data = (usn,)
+	cur.execute(SQL)
+	#even if user is not in db, this update will do nothing, and it certainly won't create a new entry in logins table
+	return 'User {} has been revoked and can no longer access this site'.format(usn)
+
+
 
 @app.route('/', methods=['GET','POST'])
 @app.route('/login', methods=['GET','POST'])
@@ -111,6 +161,8 @@ def get_user_pk(username):
 
 @app.route('/add_facility', methods=['GET', 'POST'])
 def add_facility():
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
 	# need to store the list of facilites as session data
 	SQL = "SELECT fcode, common_name FROM facilities"
 	cur.execute(SQL)
@@ -141,6 +193,10 @@ def add_facility():
 		
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
+	if not check_access(): #if not active, can't access page
+		print('user is not privileged to see this page')
+		return render_template('no_access.html')
+
 	if session['position'] == 'facilities officer':
 		data = need_approval()
 	elif session['position'] == 'logistics officer':
@@ -171,6 +227,9 @@ def need_time():
 
 @app.route('/add_asset', methods=['GET', 'POST'])
 def add_asset():
+	
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
 	SQL = "SELECT asset_tag, description FROM assets"
 	cur.execute(SQL)
 	res = cur.fetchall()
@@ -219,6 +278,9 @@ def add_asset():
 
 @app.route('/dispose_asset', methods=['GET', 'POST'])
 def dispose_asset():
+	
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
 	user = session['username']
 	SQL = "SELECT role from logins JOIN roles ON logins.role_fk = roles.role_pk WHERE username = '{}'".format(user)
 	cur.execute(SQL)
@@ -248,6 +310,9 @@ def dispose_asset():
 
 @app.route('/asset_report', methods=['GET', 'POST'])
 def asset_report():
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
+	print(session['username'])
 	if request.method == 'GET':
 		return render_template('asset_report.html')
 	elif request.method == 'POST':
@@ -267,6 +332,8 @@ def asset_report():
 
 @app.route('/transfer_req', methods=['GET', 'POST'])
 def transfer_req():
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
 	if session['position'] != 'logistics officer':
 		return render_template('not_officer.html')
 	if request.method == 'GET':
@@ -319,6 +386,8 @@ def transfer_req():
 #APPROVE TRANSFER REQUESTS
 @app.route('/approve_req', methods=['GET', 'POST'])
 def approve_req():
+	if not check_access(): #if not active, can't access page
+		return render_template('no_access.html')
 	if session['position'] != 'facilities officer':
 		return '<!DOCTYPE HTML> Whoops! Only facilities officers can approve transfer requests'
 	if request.method == 'GET' and 'request_pk' in request.args:
@@ -360,6 +429,8 @@ def approve_req():
 
 @app.route('/update_transit', methods=['GET', 'POST'])
 def update_transit():
+	if not check_access():
+		return render_template('no_access.html')
 	if session['position'] != 'logistics officer':
 		return '<!DOCTYPE HTML> Uh-oh! Only logistics officers can update transit times'
 	if request.method == 'GET' and 'asset' in request.args:
