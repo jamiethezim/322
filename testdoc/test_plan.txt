@@ -1,1 +1,55 @@
-test
+Test Plan
+1. Test login screen and create_user screen
+	Run web app and point browser to 127.0.0.1:8080/ or /login -> should get page asking for credential log-in
+	enter any pair of credentials -> get a html page saying your username and password don't match
+	Change URl to /create_user - > should get a page asking for a username, password and title
+	enter any credentials -> should get a page saying user was added successfully
+	refresh page without sending form data -> get html page saying user already exists
+	Go back to /login screen and login with recently created credentials -> Get Dashboard
+
+2. Test Dashboard links
+	Username and title should be displayed
+	Click Asset Report Link -> html page listing assets and filter methods
+	Click Add New Asset -> Goes to add_asset route, html forms to make new asset
+	Click Add Facility -> Goes to add_facility route, html forms to make new facility
+	Click Dispose Asset -> Goes to dispose_asset route, html form to choose asset to dispose of
+	Click Request Asset Transfer -> Goes to transfer_req route, html form to fill out transfer request
+	Under need times set, it should be empty if no transfers have been created/approved
+
+3. Test Add Facility
+	Choose DC facility from drop-down, add random fcode, click submit ->
+		Should return add_facility route, but the facility just added is now listed at top of page
+	Add DC facility again with same fcode -> get html saying facility already exists
+	Add HQ facility -> HQ added to list
+
+4. Test Add Asset
+	Click dropdown menu -> only DC and HQ appear as options
+	Add asset in DC, tag 12, description pen, date 3/1/2017 -> appears at top of html page
+	Add exact same asset -> get html page saying it already exists
+	Add asset in HQ, tag 23, description box, date 3/2/2017 -> appears at top of html page
+
+5. Dispose Asset
+	Dispose of asset tag 12, 3/1/2017 -> html saying item was disposed of
+	Try to dispose of exact same item -> html saying you can't dispose already disposed items
+
+6. Asset Report /asset_report
+	Filter by DC and 3/1/2017 -> asset tag 12 pen should appear listed at bottom
+	Filter by no facility and 3/2/2017 -> asset tag 23 box should appear listed at bottom
+
+7. Request asset_transfer /transfer_req
+	Enter asset tag 12 and any src/dest facilities -> html saying request was submitted
+	Enter asset tag 12 again and submit -> html saying transfer was already requested
+	Enter asset tag 23 -> html saying request was submitted
+
+8. Go to create_user and create a user with facilities officer privilege
+	Login with those credentials, go to dashboard -> Dispose Asset and Transfer request links don't appear
+	Under needs approval -> two items should appear with links to go approve them
+	click on the first one, say NO and submit -> go back to dashboard
+	click on the remaining one under needs approval, say YES -> go back to dashboard, no more links under needs approval
+
+9. Go to login screen and login with logistics officer credentials
+	On Dashboard, under Need Times Set should only be one item, click Set, set date times to be 3/4/2017 - 3/5/2017 ->
+		Go back to Dashboard, nothing under need times set
+
+10. Click on Asset Report, filter by 3/1/2017 -> nothing listed
+	Filter by 3/5/2017 -> asset tag 12 pen listed
