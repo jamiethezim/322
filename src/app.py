@@ -73,10 +73,8 @@ def activate_user():
 		#but first we have to get the right role for them
 		SQL = "SELECT role_pk from roles WHERE role = %s"
 		data = (titles[title],)
-		print(data)
 		cur.execute(SQL,data)
 		office = cur.fetchone()[0] #role primary key identifier
-		print(office)
 		
 		SQL = "INSERT INTO logins (username, password, role_fk, active) VALUES (%s, %s, %s, %s)"
 		data = (usn, pwd, office, True)
@@ -453,7 +451,6 @@ def update_transit():
 		if (not res) or (not res[0][0] is None): #if asset is unfound in transit table or the unload time is already set (not none)
 			return '<!DOCTYPE HTML> Invalid request - not in transit table or unload time is already set'
 		else:	
-			print('in else loop')
 			data = dict()
 			data['asset'] = asset
 			return render_template('update_transit.html', data = [data])
