@@ -60,3 +60,5 @@ CREATE TABLE in_transit(
 -- For both I reference asset_pk so that if an asset is requested to be moved
 -- and then moved, asset_pk is more granular in referencing exactly which 
 -- item should be moved
+INSERT INTO roles (role_pk, role) VALUES (1, 'logistics officer');
+INSERT INTO roles (role_pk, role) VALUES (2, 'facilities officer');
