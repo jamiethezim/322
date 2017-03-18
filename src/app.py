@@ -137,7 +137,8 @@ def login():
 		cur.execute(SQL)
 		res2 = cur.fetchall()
 		if not res1 or not res2: #if the query didn't find anything
-			return render_template('fail.html')
+			return "<!DOCTYPE HTML> Uh-oh! Username and password don't match"
+
 		
 		#parse the data from the query result	
 		found_usn = res1[0][1]
