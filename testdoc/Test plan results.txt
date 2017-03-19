@@ -1,0 +1,51 @@
+Test Plan
+1. Test login screen and create_user screen
+	login page: Works
+	Bad credentials rejected: Works
+	create_user page: Works
+	User creation: Works
+	Reject duplicate users: Works
+	Login and reach dashboard: Works
+
+2. Test Dashboard links
+	Username and role: Works
+	All internal pages linked from dashboard: Works
+	Needs Times Set: Works (empty initially)
+
+3. Test Add Facility
+	Add DC facility: Works
+	Reject duplicate DC facility: Works (as a note, Assignment 7 specs say that there should be no duplicate common names OR fcodes, so a new DC facility with a different fcode might need to be rejected too.)
+	Add HQ facility: Works
+
+4. Test Add Asset
+	Facility options limited to existing facilities: Works.
+	Add asset to DC: Works
+	Duplicate asset rejected: Works
+	Add asset to HQ: Works
+
+5. Dispose Asset
+	Dispose of asset 12: *Works - Asset is successfully disposed, but there is no notification of disposal. User is just silently routed to dashboard.
+	Dispose of asset 12 again, rejected: Works
+	
+
+6. Asset Report /asset_report
+	Report for DC 3/1/2017 shows asset 12: Works
+	Report for no facility on 3/2/2017 shows asset 23: Works
+
+7. Request asset_transfer /transfer_req
+	Request transfer for asset 12: Works (although should it? asset 12 has been marked disposed.)
+	Second request for asset 12, notified of duplicate: **Does not work, second request goes though with same success page.
+	Request transfer for asset 23: Works
+
+8. Go to create_user and create a user with facilities officer privilege
+	Login with Facilities Officer, no dispose asset/transfer request options: Works
+	Items appear for approval: *Works - 3 items appear, not two. This is consistent with behavior from previous step, though.
+	Deny first request, request no longer on dashboard: Works
+	Approve second request, request no longer on dashboard: Works
+
+9. Go to login screen and login with logistics officer credentials
+	Set load and unload times: Works 
+	Transfer request cleared from dashboard: Works
+
+10. Click on Asset Report, filter by 3/1/2017 -> nothing listed
+	Report for 3/5/2017 yields asset 23: Works
